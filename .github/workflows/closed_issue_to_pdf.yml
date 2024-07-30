@@ -9,11 +9,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Display Issue Details
+
+      - name: Set up Pandoc
         run: |
-          echo "Issue Number: ${{ github.event.issue.number }}"
-          echo "Issue Title: ${{ github.event.issue.title }}"
-          echo "Issue Body: ${{ github.event.issue.body }}"
-          echo "Closed by: ${{ github.event.sender.login }}"
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
+      - name: Create Issue Details Markdown
+        run: |
+          echo "# Issue #${{ github.event.issue.number }}" > issue.md
+          echo "## Title: ${{ github.event.issue.title }}" >> issue.md
+          echo "## State: ${{ github.event.issue.state }}" >> issue.md
+          echo "## Created At: ${{ github.event.issue.created_at }}" >> issue.md
+          echo "## Updated At: ${{ github.event.issue.updated_at }}" >> issue.md
+          echo "## Closed At: ${{ github.event.issue.closed_at }}" >> issue.md
+          echo "## Author: ${{ github.event.issue.user.login }}" >> issue.md
+          echo "## Body:" >> issue.md
+          echo "${{ github.event.issue.body }}" >> issue.md
+          echo "## Labels:" >> issue.md
+          echo "${{ toJSON(github.event.issue.labels) }}" >> issue.md
+          echo "## Assignees:" >> issue.md
+          echo "${{ toJSON(github.event.issue.assignees) }}" >> issue.md
+
+      - name: Convert Markdown to PDF
+        run: pandoc issue.md -o issue_details.pdf
+
+      - name: Upload PDF
+        uses: actions/upload-artifact@v3
+        with:
+          name: issue-details
+          path: issue_details.pdf
