@@ -1,0 +1,19 @@
+name: Closed issue to PDF
+
+on:
+  issues:
+    types: [closed]
+
+jobs:
+  issue_info:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Display Issue Details
+        run: |
+          echo "Issue Number: ${{ github.event.issue.number }}"
+          echo "Issue Title: ${{ github.event.issue.title }}"
+          echo "Issue Body: ${{ github.event.issue.body }}"
+          echo "Closed by: ${{ github.event.sender.login }}"
